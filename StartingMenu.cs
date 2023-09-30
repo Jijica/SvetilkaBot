@@ -10,29 +10,42 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace SvetilkaBot
 {
-    internal class ASCIIMenu : IMenu
+    internal class StartingMenu : IMenu
     {
         private readonly ITelegramBotClient _botClient;
         private readonly CancellationToken _cancellationToken;
         private readonly Chat _chat;
         private InlineKeyboardMarkup _inlineKeyboard;
 
-        public ASCIIMenu(ITelegramBotClient botClient, Chat chat, CancellationToken cancellationToken)
+
+        public StartingMenu(ITelegramBotClient botClient, Chat chat, CancellationToken cancellationToken)
         {
             _botClient = botClient;
             _chat = chat;
             _cancellationToken = cancellationToken;
+
             GenerateInlineKeyboard();
         }
 
         public async Task PrintMenu(int messageId, bool alternativeMode)
         {
-            await _botClient.EditMessageTextAsync(
+            if(alternativeMode == true)
+            {
+                await _botClient.SendTextMessageAsync(
                 chatId: _chat.Id,
-                messageId: messageId,
-                text: "Выберите символ для отображения на RGB матрице",
+                text: "Выберите режим работы",
                 replyMarkup: _inlineKeyboard,
                 cancellationToken: _cancellationToken);
+            }
+            else
+            {
+                await _botClient.EditMessageTextAsync(
+                chatId: _chat.Id,
+                messageId: messageId,
+                text: "Выберите режим работы",
+                replyMarkup: _inlineKeyboard,
+                cancellationToken: _cancellationToken);
+            }
         }
 
         public async Task CallbackQueryHandle(CallbackQuery callbackQuery)
@@ -49,28 +62,22 @@ namespace SvetilkaBot
 
         private void GenerateInlineKeyboard()
         {
-            var buttonsArray = new InlineKeyboardButton[12][];
-            // ASCII printable characters
-            var asciiCodeDecimal = 33;
-            for (int i = 0; i < 10; i++)
-            {
-                buttonsArray[i] = new InlineKeyboardButton[9];
-                for (int j = 0; j < 9; j++)
-                {
-                    buttonsArray[i][j] = InlineKeyboardButton.WithCallbackData($"{(char)asciiCodeDecimal}", $"ASCII-{asciiCodeDecimal}");
-                    asciiCodeDecimal++;
+            _inlineKeyboard = new(
+                new[] {
+                    new[]
+                    {
+                        InlineKeyboardButton.WithCallbackData("Передать ASCII символы", "ASCIIMenu")
+                    },
+                    new[]
+                    {
+                        InlineKeyboardButton.WithCallbackData("Функционал отсутствует \U0001F512", "notImplemented")
+                    },
+                    new[]
+                    {
+                        InlineKeyboardButton.WithCallbackData("Функционал отсутствует \U0001F512", "notImplemented")
+                    }
                 }
-            }
-            buttonsArray[10] = new InlineKeyboardButton[3];
-            for (int i = 0; i < 3; i++)
-            {
-                buttonsArray[10][i] = InlineKeyboardButton.WithCallbackData($"{(char)asciiCodeDecimal}", $"ASCII-{asciiCodeDecimal}");
-                asciiCodeDecimal++;
-            }
-            buttonsArray[11] = new InlineKeyboardButton[1];
-            buttonsArray[11][0] = InlineKeyboardButton.WithCallbackData($"Вернуться назад \u21A9", $"StartingMenu");
-
-            _inlineKeyboard = new(buttonsArray);
+                );
         }
     }
 }

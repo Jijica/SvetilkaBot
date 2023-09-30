@@ -9,7 +9,7 @@ namespace SvetilkaBot
 {
     public enum UserState
     {
-        NoState, Menu, ASCII
+        NoState, StartingMenu, ASCII
     }
 
     public class StateService

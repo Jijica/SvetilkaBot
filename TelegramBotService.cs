@@ -12,11 +12,13 @@ namespace SvetilkaBot
     {
         private readonly TelegramBotClient _botClient;
         private Chat _chat;
-        private MainMenu _menu;
+        private IMenu _menu;
+        private StateService _stateService;
 
         public TelegramBotService(TelegramBotClient botClient)
         {
             _botClient = botClient;
+            _stateService = new StateService();
         }
 
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
@@ -69,13 +71,15 @@ namespace SvetilkaBot
 
             if (text == "/start")
             {
-                var button = InlineKeyboardButton.WithCallbackData("Продолжить \u27a1", "greeting_next");
+                var button = InlineKeyboardButton.WithCallbackData("Продолжить \u27a1", "StartingMenu");
                 var inline = new InlineKeyboardMarkup(button);
                 await botClient.SendTextMessageAsync(
                     chatId: _chat.Id,
                     text: "Приветсвую!\nДанный бот пока что умеет предавать только ASCII символы для отображения на светодиодной матрице (в целях упрощения примера)",
                     replyMarkup: inline,
                     cancellationToken: cancellationToken);
+
+                await Task.Delay(1000);
             }
         }
 
@@ -83,15 +87,28 @@ namespace SvetilkaBot
         {
             switch (callbackQuery.Data)
             {
-                case "greeting_next":
-                    _menu = new MainMenu(botClient, _chat, cancellationToken);
-                    await _menu.PrintMenu();
+                case "StartingMenu":
+                    switch (_stateService.GetState(_chat.Id))
+                    {
+                        case UserState.NoState:
+                            _menu = new StartingMenu(botClient, _chat, cancellationToken);
+                            await _menu.PrintMenu(callbackQuery.Message.MessageId, true);
+                            _stateService.SetState(_chat.Id, UserState.StartingMenu);
+                            break;
+                         case UserState.StartingMenu:
+                            _menu = new StartingMenu(botClient, _chat, cancellationToken);
+                            await _menu.PrintMenu(callbackQuery.Message.MessageId);
+                            _stateService.SetState(_chat.Id, UserState.StartingMenu);
+                            break;
+                    }
+                    break;
+                case "ASCIIMenu":
+                    _menu = new ASCIIMenu(botClient, _chat, cancellationToken);
+                    await _menu.PrintMenu(callbackQuery.Message.MessageId);
+                    _stateService.SetState(_chat.Id, UserState.ASCII);
                     break;
                 default:
-                    if (_menu != null)
-                    {
-                        await _menu.UpdateCallbackQueryHandle(botClient, callbackQuery, cancellationToken);
-                    }
+                    _menu.CallbackQueryHandle(callbackQuery);
                     break;
             }
         }
