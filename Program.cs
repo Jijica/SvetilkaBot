@@ -1,4 +1,7 @@
-﻿using SvetilkaBot;
+﻿using MQTTnet;
+using MQTTnet.Client;
+using MQTTnet.Server;
+using SvetilkaBot;
 using System.Windows.Markup;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
@@ -6,33 +9,39 @@ using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using SvetilkaBot.Services;
 
-var envVar = Environment.GetEnvironmentVariable("SvetilkaBot", EnvironmentVariableTarget.User);
-var botClient = new TelegramBotClient(envVar);
-
-using CancellationTokenSource cancellationToken = new();
-
-// StartReceiving does not block the caller thread. Receiving is done on the ThreadPool.
-ReceiverOptions receiverOptions = new()
+namespace SvetilkaBot
 {
-    AllowedUpdates = Array.Empty<UpdateType>() // receive all update types except ChatMember related updates
-};
+    class Program
+    {
+        static async Task Main()
+        {
+            var envVar = Environment.GetEnvironmentVariable("SvetilkaBotToken", EnvironmentVariableTarget.User);
+            var botClient = new TelegramBotClient(envVar);
+            using CancellationTokenSource cancellationToken = new();
 
-var botService = new TelegramBotService(botClient);
+            envVar = Environment.GetEnvironmentVariable("MQTT_ID", EnvironmentVariableTarget.User);
+            var mqttClientOptions = new MqttClientOptionsBuilder()
+                .WithClientId(envVar)
+                .WithTcpServer("dev.rightech.io", 1883)
+                .Build();
+            var mqttClient = new MqttService(mqttClientOptions);
 
-botClient.StartReceiving(
-    updateHandler: botService.HandleUpdateAsync,
-    pollingErrorHandler: botService.HandlePollingErrorAsync,
-    receiverOptions: receiverOptions,
-    cancellationToken: cancellationToken.Token
-);
+            envVar = Environment.GetEnvironmentVariable("SqlConnectionString", EnvironmentVariableTarget.User);
+            var dbService = new DBService(envVar);
 
+            var tgBotService = new TelegramBotService(botClient,mqttClient);
 
-var me = await botClient.GetMeAsync();
+            tgBotService.StartService(cancellationToken);
+            mqttClient.StartService();
 
-Console.WriteLine($"Start listening for @{me.Username}");
-Console.ReadLine();
+            var me = await botClient.GetMeAsync();
 
-// Send cancellation request to stop bot
-cancellationToken.Cancel();
+            Console.WriteLine($"Start listening for @{me.Username}");
+            Console.ReadLine();
 
+            cancellationToken.Cancel();
+        }
+    }
+}
