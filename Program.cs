@@ -1,15 +1,6 @@
-﻿using MQTTnet;
-using MQTTnet.Client;
-using MQTTnet.Server;
-using SvetilkaBot;
-using System.Windows.Markup;
-using Telegram.Bot;
-using Telegram.Bot.Exceptions;
-using Telegram.Bot.Polling;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
+﻿using MQTTnet.Client;
 using SvetilkaBot.Services;
+using Telegram.Bot;
 
 namespace SvetilkaBot
 {
@@ -28,7 +19,7 @@ namespace SvetilkaBot
                 .Build();
             var mqttClient = new MqttService(mqttClientOptions);
 
-            var tgBotService = new TelegramBotService(botClient,mqttClient);
+            var tgBotService = new TelegramBotService(botClient, mqttClient);
 
             tgBotService.StartService(cancellationToken);
             mqttClient.StartService();
