@@ -28,9 +28,6 @@ namespace SvetilkaBot
                 .Build();
             var mqttClient = new MqttService(mqttClientOptions);
 
-            envVar = Environment.GetEnvironmentVariable("SqlConnectionString", EnvironmentVariableTarget.User);
-            var dbService = new DBService(envVar);
-
             var tgBotService = new TelegramBotService(botClient,mqttClient);
 
             tgBotService.StartService(cancellationToken);

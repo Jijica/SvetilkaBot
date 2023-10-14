@@ -4,7 +4,6 @@ using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
-using Telegram.Bots.Types.Inline;
 
 namespace SvetilkaBot.Services
 {
@@ -13,13 +12,11 @@ namespace SvetilkaBot.Services
         private readonly TelegramBotClient _botClient;
         private Chat _chat;
         private IMenu _menu;
-        private StateService _stateService;
         private MqttService _mqttService;
 
         public TelegramBotService(TelegramBotClient botClient, MqttService mqttService)
         {
             _botClient = botClient;
-            _stateService = new StateService();
             _mqttService = mqttService;
         }
 
@@ -30,7 +27,6 @@ namespace SvetilkaBot.Services
                 AllowedUpdates = Array.Empty<UpdateType>()
             };
 
-            // StartReceiving does not block the caller thread. Receiving is done on the ThreadPool.
             _botClient.StartReceiving(
                 updateHandler: HandleUpdateAsync,
                 pollingErrorHandler: HandlePollingErrorAsync,
@@ -96,7 +92,7 @@ namespace SvetilkaBot.Services
                     text: "Приветсвую!\nДанный бот пока что умеет предавать только ASCII символы для отображения на светодиодной матрице (в целях упрощения примера)",
                     replyMarkup: inline,
                     cancellationToken: cancellationToken);
-
+                DBService.InitializeChat(_chat.Id);
                 await Task.Delay(1000);
             }
         }
@@ -106,24 +102,24 @@ namespace SvetilkaBot.Services
             switch (callbackQuery.Data)
             {
                 case "StartingMenu":
-                    switch (_stateService.GetMenuState(_chat.Id))
+                    switch (DBService.GetMenuState(_chat.Id))
                     {
-                        case UserState.NoState:
+                        case "NoState":
                             _menu = new StartingMenu(botClient, _chat, cancellationToken);
                             await _menu.PrintMenu(callbackQuery.Message.MessageId, true);
-                            _stateService.SetMenuState(_chat.Id, UserState.StartingMenu);
+                            DBService.SetMenuState(_chat.Id, "StartingMenu");
                             break;
                         default:
                             _menu = new StartingMenu(botClient, _chat, cancellationToken);
                             await _menu.PrintMenu(callbackQuery.Message.MessageId);
-                            _stateService.SetMenuState(_chat.Id, UserState.StartingMenu);
+                            DBService.SetMenuState(_chat.Id, "StartingMenu");
                             break;
                     }
                     break;
                 case "ASCIIMenu":
-                    _menu = new ASCIIMenu(botClient, _chat, _stateService, _mqttService, cancellationToken);
+                    _menu = new ASCIIMenu(botClient, _chat, _mqttService, cancellationToken);
                     await _menu.PrintMenu(callbackQuery.Message.MessageId);
-                    _stateService.SetMenuState(_chat.Id, UserState.ASCII);
+                    DBService.SetMenuState(_chat.Id, "ASCII");
                     break;
                 default:
                     await _menu.CallbackQueryHandle(callbackQuery);

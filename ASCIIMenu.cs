@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using SvetilkaBot.Services;
+﻿using SvetilkaBot.Services;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -17,15 +11,13 @@ namespace SvetilkaBot
         private readonly CancellationToken _cancellationToken;
         private readonly Chat _chat;
         private InlineKeyboardMarkup _inlineKeyboard;
-        private StateService _stateService;
         private MqttService _mqttService;
 
-        public ASCIIMenu(ITelegramBotClient botClient, Chat chat,StateService stateService, MqttService mqttService, CancellationToken cancellationToken)
+        public ASCIIMenu(ITelegramBotClient botClient, Chat chat, MqttService mqttService, CancellationToken cancellationToken)
         {
             _botClient = botClient;
             _chat = chat;
             _cancellationToken = cancellationToken;
-            _stateService = stateService;
             _mqttService = mqttService;
             GenerateInlineKeyboard();
         }
@@ -45,15 +37,15 @@ namespace SvetilkaBot
             if (callbackQuery.Data.StartsWith("ASCII-"))
             {
                 var CBQstripped = callbackQuery.Data.Substring(6);
-                if (CBQstripped == _stateService.GetRGBState(_chat.Id))
+                if (CBQstripped == DBService.GetLedState(_chat.Id))
                 {
-                    _stateService.SetRGBState(_chat.Id, "OFF");
+                    DBService.SetLedState(_chat.Id, "OFF");
                 }
                 else
                 {
-                    _stateService.SetRGBState(_chat.Id, CBQstripped);
+                    DBService.SetLedState(_chat.Id, CBQstripped);
                 }
-                _mqttService.SendMessageToMQTTBroker(_stateService.GetRGBState(_chat.Id));
+                _mqttService.SendMessageToMQTTBroker(DBService.GetLedState(_chat.Id));
             }
             GenerateInlineKeyboard();
             PrintMenu(callbackQuery.Message.MessageId);
@@ -88,7 +80,7 @@ namespace SvetilkaBot
         private string ButtonStatusHandle(int asciiCodeDecimal)
         {
 
-            if (_stateService.GetRGBState(_chat.Id) == ((char)asciiCodeDecimal).ToString())
+            if (DBService.GetLedState(_chat.Id) == ((char)asciiCodeDecimal).ToString())
             {
                 return $"{(char)asciiCodeDecimal} \u2705"; //u2705 //\U0001F4A1
             }

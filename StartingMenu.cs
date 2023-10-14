@@ -17,7 +17,6 @@ namespace SvetilkaBot
         private readonly Chat _chat;
         private InlineKeyboardMarkup _inlineKeyboard;
 
-
         public StartingMenu(ITelegramBotClient botClient, Chat chat, CancellationToken cancellationToken)
         {
             _botClient = botClient;
