@@ -90,7 +90,7 @@ namespace SvetilkaBot.Services
                 var inline = new InlineKeyboardMarkup(button);
                 await botClient.SendTextMessageAsync(
                     chatId: _chat.Id,
-                    text: "Приветсвую!\nДанный бот пока что умеет предавать только ASCII символы для отображения на светодиодной матрице (в целях упрощения примера)",
+                    text: "Приветствую!\nДанный бот пока что умеет предавать только ASCII символы для отображения на светодиодной матрице (в целях упрощения примера)",
                     replyMarkup: inline,
                     cancellationToken: cancellationToken);
                 DBService.InitializeChat(_chat.Id);

@@ -8,7 +8,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace SvetilkaBot
+namespace SvetilkaBot.Menu
 {
     internal class StartingMenu : IMenu
     {
@@ -28,7 +28,7 @@ namespace SvetilkaBot
 
         public async Task PrintMenu(int messageId, bool alternativeMode)
         {
-            if(alternativeMode == true)
+            if (alternativeMode == true)
             {
                 await _botClient.SendTextMessageAsync(
                 chatId: _chat.Id,
