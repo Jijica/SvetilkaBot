@@ -53,6 +53,14 @@ namespace SvetilkaBot.Menu
                 GenerateInlineKeyboard();
                 PrintMenu(callbackQuery.Message.MessageId);
             }
+            else if(callbackQuery.Data == "ColourStatus")
+            {
+                await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id, $"текущий цвет: {ColourMenu.GetUnicodeSymbol(DBService.GetColourState(_chat.Id))}");
+            }
+            else
+            {
+                await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id, $"текущая яркость: {DBService.GetBrightnessState(_chat.Id)}");
+            }
         }
 
         private void GenerateInlineKeyboard()
@@ -75,10 +83,12 @@ namespace SvetilkaBot.Menu
                 buttonsArray[10][i] = InlineKeyboardButton.WithCallbackData($"{ButtonStatusHandle(asciiCodeDecimal)}", $"ASCII-{(char)asciiCodeDecimal}");
                 asciiCodeDecimal++;
             }
-            buttonsArray[11] = new InlineKeyboardButton[1];
+            buttonsArray[11] = new InlineKeyboardButton[2];
             buttonsArray[11][0] = InlineKeyboardButton.WithCallbackData($"Изменить цвет \U0001F308", "ColourMenu");
-            buttonsArray[12] = new InlineKeyboardButton[1];
+            buttonsArray[11][1] = InlineKeyboardButton.WithCallbackData($"текущий цвет: {ColourMenu.GetUnicodeSymbol(DBService.GetColourState(_chat.Id))}", "ColourStatus");
+            buttonsArray[12] = new InlineKeyboardButton[2];
             buttonsArray[12][0] = InlineKeyboardButton.WithCallbackData($"Изменить яркость \U0001F506", "BrightnessMenu");
+            buttonsArray[12][1] = InlineKeyboardButton.WithCallbackData($"текущая яркость: {DBService.GetBrightnessState(_chat.Id)}", "BrightnessStatus");
             buttonsArray[13] = new InlineKeyboardButton[1];
             buttonsArray[13][0] = InlineKeyboardButton.WithCallbackData($"Вернуться назад \u21A9", "StartingMenu");
 
@@ -89,7 +99,7 @@ namespace SvetilkaBot.Menu
         {
             if (_asciiState == ((char)asciiCodeDecimal).ToString())
             {
-                return $"{(char)asciiCodeDecimal} \u2705"; //u2705 //\U0001F4A1
+                return $"{(char)asciiCodeDecimal} \u2705";
             }
             return $"{(char)asciiCodeDecimal}";
         }

@@ -1,5 +1,4 @@
 ﻿using SvetilkaBot.Services;
-using System.Collections.Immutable;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -14,6 +13,13 @@ namespace SvetilkaBot.Menu
         private InlineKeyboardMarkup _inlineKeyboard;
         private MqttService _mqttService;
         private string _colourState;
+        private static readonly Dictionary<string, string> _stateUnicodeDictionary = new()
+        {
+            { "White", "\U00002B1C"},
+            { "Red", "\U0001f7e5" },
+            { "Green", "\U0001F7E9"},
+            { "Blue", "\U0001F7E6"}
+        };
 
         public ColourMenu(ITelegramBotClient botClient, Chat chat, MqttService mqttService, CancellationToken cancellationToken)
         {
@@ -34,6 +40,11 @@ namespace SvetilkaBot.Menu
             PrintMenu(callbackQuery.Message.MessageId);
         }
 
+        public static string GetUnicodeSymbol(string state)
+        {
+            return _stateUnicodeDictionary[state];
+        }
+
         public async Task PrintMenu(int messageId, bool alternativeMode = false)
         {
             await _botClient.EditMessageTextAsync(
@@ -43,6 +54,7 @@ namespace SvetilkaBot.Menu
                 replyMarkup: _inlineKeyboard,
                 cancellationToken: _cancellationToken);
         }
+
         private void GenerateInlineKeyboard()
         {
             var buttonsDescription = new string[,]

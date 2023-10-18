@@ -29,7 +29,7 @@ namespace SvetilkaBot.Services
                     .Build();
 
                 await _mqttClient.PublishAsync(mqttMessage);
-                Console.WriteLine($"Message '{message}' sent to MQTT broker.");
+                Console.WriteLine($"Message '{message}' sent to MQTT broker, topic: base/state/ascii");
             }
             else
             {
@@ -47,7 +47,7 @@ namespace SvetilkaBot.Services
                     .Build();
 
                 await _mqttClient.PublishAsync(mqttMessage);
-                Console.WriteLine($"Message '{message}' sent to MQTT broker.");
+                Console.WriteLine($"Message '{message}' sent to MQTT broker, topic: base/state/colour");
             }
             else
             {
@@ -65,7 +65,7 @@ namespace SvetilkaBot.Services
                     .Build();
 
                 await _mqttClient.PublishAsync(mqttMessage);
-                Console.WriteLine($"Message '{message}' sent to MQTT broker.");
+                Console.WriteLine($"Message '{message}' sent to MQTT broker, topic: base/state/brightness");
             }
             else
             {

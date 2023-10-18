@@ -1,4 +1,6 @@
 ﻿using SvetilkaBot.Menu;
+using System.Threading;
+using System.Windows.Markup;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
@@ -14,6 +16,7 @@ namespace SvetilkaBot.Services
         private Chat _chat;
         private IMenu _menu;
         private MqttService _mqttService;
+        //private int _chatIdMenuToEdit;
 
         public TelegramBotService(TelegramBotClient botClient, MqttService mqttService)
         {
@@ -90,13 +93,13 @@ namespace SvetilkaBot.Services
                 var inline = new InlineKeyboardMarkup(button);
                 await botClient.SendTextMessageAsync(
                     chatId: _chat.Id,
-                    text: "Приветствую!\nДанный бот пока что умеет предавать только ASCII символы для отображения на светодиодной матрице (в целях упрощения примера)",
+                    text: "Приветствую!\nНа данный момент бот умеет предавать только ASCII символы для отображения на светодиодной матрице, менять их цвет и яркость свечения",
                     replyMarkup: inline,
                     cancellationToken: cancellationToken);
                 DBService.InitializeChat(_chat.Id);
                 _mqttService.SendAsciiStateMQTT("OFF");
                 _mqttService.SendColourStateMQTT("White");
-                _mqttService.SendBrightnessStateMQTT("50%");
+                _mqttService.SendBrightnessStateMQTT("25%");
             }
         }
 
@@ -108,6 +111,12 @@ namespace SvetilkaBot.Services
                     switch (DBService.GetMenuState(_chat.Id))
                     {
                         case "NoState":
+                            await _botClient.EditMessageTextAsync(
+                                chatId: _chat.Id,
+                                messageId: callbackQuery.Message.MessageId,
+                                text: "Приветствую!\nНа данный момент бот умеет предавать только ASCII символы для отображения на светодиодной матрице, менять их цвет и яркость свечения\n \n \u3164",
+                                cancellationToken: cancellationToken);
+
                             _menu = new StartingMenu(botClient, _chat, cancellationToken);
                             await _menu.PrintMenu(callbackQuery.Message.MessageId, true);
                             DBService.SetMenuState(_chat.Id, "StartingMenu");

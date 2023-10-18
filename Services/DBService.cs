@@ -24,7 +24,7 @@ namespace SvetilkaBot.Services
 
             using (var conn = new NpgsqlConnection(Config.SqlConnectionString))
             {
-                conn.Execute(query, new { chatid = chatID, menustate = "NoState", ledstate = "OFF", rgbstate = "White", brightnessstate = "50%" });
+                conn.Execute(query, new { chatid = chatID, menustate = "NoState", ledstate = "OFF", rgbstate = "White", brightnessstate = "25%" });
             }
         }
         public static void SetMenuState(long chatID, string state)
