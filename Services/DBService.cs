@@ -1,14 +1,5 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
-using Dapper;
+﻿using Dapper;
 using Npgsql;
-using Telegram.Bot.Types;
-
 
 namespace SvetilkaBot.Services
 {
@@ -17,16 +8,24 @@ namespace SvetilkaBot.Services
         public static void InitializeChat(long chatID)
         {
             var query = @"
-                        insert into botuser (chatid, menustate, ledstate, rgbstate, brightnessstate)
-                        select @chatid, @menustate, @ledstate, @rgbstate, @brightnessstate
-                        where not exists (select 1 from botuser where chatid = @chatid)
-                        ";
+                MERGE INTO botuser AS target
+                USING (VALUES (@chatid)) AS source (chatid)
+                ON target.chatid = source.chatid
+                WHEN MATCHED THEN
+                    UPDATE SET
+                        menustate = @menustate,
+                        ledstate = @ledstate,
+                        rgbstate = @rgbstate,
+                        brightnessstate = @brightnessstate
+                WHEN NOT MATCHED THEN
+                    INSERT (chatid, menustate, ledstate, rgbstate, brightnessstate)
+                    VALUES (@chatid, @menustate, @ledstate, @rgbstate, @brightnessstate);
+    ";
 
             using (var conn = new NpgsqlConnection(Config.SqlConnectionString))
             {
-                conn.Execute(query, new { chatid = chatID, menustate = "NoState", ledstate = "NoState", rgbstate = "NoState", brightnessstate = "NoState" });
+                conn.Execute(query, new { chatid = chatID, menustate = "NoState", ledstate = "OFF", rgbstate = "White", brightnessstate = "50%" });
             }
-
         }
         public static void SetMenuState(long chatID, string state)
         {
@@ -34,7 +33,7 @@ namespace SvetilkaBot.Services
 
             using (var conn = new NpgsqlConnection(Config.SqlConnectionString))
             {
-                conn.Execute(query, new { chatid = chatID, menustate = state});
+                conn.Execute(query, new { chatid = chatID, menustate = state });
             }
         }
 
@@ -48,13 +47,23 @@ namespace SvetilkaBot.Services
             }
         }
 
-        private static void SetRgbState(long chatID, string state)
+        public static void SetColourState(long chatID, string state)
         {
             var query = @"update botuser set rgbstate = @rgbstate where chatid = @chatid";
 
             using (var conn = new NpgsqlConnection(Config.SqlConnectionString))
             {
                 conn.Execute(query, new { chatid = chatID, rgbstate = state });
+            }
+        }
+
+        public static void SetBrightnessState(long chatID, string state)
+        {
+            var query = @"update botuser set brightnessstate = @brightnessstate where chatid = @chatid";
+
+            using (var conn = new NpgsqlConnection(Config.SqlConnectionString))
+            {
+                conn.Execute(query, new { chatid = chatID, brightnessstate = state });
             }
         }
 
@@ -75,9 +84,18 @@ namespace SvetilkaBot.Services
                 return conn.QueryFirstOrDefault<string>(query, new { chatid = chatID });
             }
         }
-        private string GetRgbState(long chatID)
+        public static string GetColourState(long chatID)
         {
             var query = @"select rgbstate from botuser where chatid = @chatid";
+            using (var conn = new NpgsqlConnection(Config.SqlConnectionString))
+            {
+                return conn.QueryFirstOrDefault<string>(query, new { chatid = chatID });
+            }
+        }
+
+        public static string GetBrightnessState(long chatID)
+        {
+            var query = @"select brightnessstate from botuser where chatid = @chatid";
             using (var conn = new NpgsqlConnection(Config.SqlConnectionString))
             {
                 return conn.QueryFirstOrDefault<string>(query, new { chatid = chatID });

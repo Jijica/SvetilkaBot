@@ -94,7 +94,9 @@ namespace SvetilkaBot.Services
                     replyMarkup: inline,
                     cancellationToken: cancellationToken);
                 DBService.InitializeChat(_chat.Id);
-                await Task.Delay(1000);
+                _mqttService.SendAsciiStateMQTT("OFF");
+                _mqttService.SendColourStateMQTT("White");
+                _mqttService.SendBrightnessStateMQTT("50%");
             }
         }
 
@@ -117,10 +119,20 @@ namespace SvetilkaBot.Services
                             break;
                     }
                     break;
-                case "ASCIIMenu":
-                    _menu = new ASCIIMenu(botClient, _chat, _mqttService, cancellationToken);
+                case "AsciiMenu":
+                    _menu = new AsciiMenu(botClient, _chat, _mqttService, cancellationToken);
                     await _menu.PrintMenu(callbackQuery.Message.MessageId);
-                    DBService.SetMenuState(_chat.Id, "ASCII");
+                    DBService.SetMenuState(_chat.Id, "AsciiMenu");
+                    break;
+                case "ColourMenu":
+                    _menu = new ColourMenu(botClient, _chat, _mqttService, cancellationToken);
+                    await _menu.PrintMenu(callbackQuery.Message.MessageId);
+                    DBService.SetMenuState(_chat.Id, "ColourMenu");
+                    break;
+                case "BrightnessMenu":
+                    _menu = new BrightnessMenu(botClient, _chat, _mqttService, cancellationToken);
+                    await _menu.PrintMenu(callbackQuery.Message.MessageId);
+                    DBService.SetMenuState(_chat.Id, "BrightnessMenu");
                     break;
                 default:
                     await _menu.CallbackQueryHandle(callbackQuery);

@@ -10,7 +10,7 @@ namespace SvetilkaBot.Menu
 {
     internal interface IMenu
     {
-        public Task PrintMenu(int messageId, bool alternativeMode = false);
-        public Task CallbackQueryHandle(CallbackQuery callbackQuery);
+        public async Task PrintMenu(int messageId, bool alternativeMode = false) { }
+        public async Task CallbackQueryHandle(CallbackQuery callbackQuery) { }
     }
 }

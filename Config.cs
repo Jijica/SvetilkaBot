@@ -10,6 +10,7 @@ namespace SvetilkaBot
     {
         public readonly static string SqlConnectionString;
         public readonly static string MqttId;
+        public readonly static string TelegramToken;
 
         static Config()
         {
@@ -17,6 +18,8 @@ namespace SvetilkaBot
             SqlConnectionString = envVar;
             envVar = Environment.GetEnvironmentVariable("MQTT_ID", EnvironmentVariableTarget.User);
             MqttId = envVar;
+            envVar = Environment.GetEnvironmentVariable("SvetilkaBotToken", EnvironmentVariableTarget.User);
+            TelegramToken = envVar;
         }
     }
 }

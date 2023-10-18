@@ -19,12 +19,48 @@ namespace SvetilkaBot.Services
             _mqttClient.ConnectAsync(_options);
         }
 
-        public async Task SendMessageToMQTTBroker(string message)
+        public async Task SendAsciiStateMQTT(string message)
         {
             if (_mqttClient.IsConnected)
             {
                 var mqttMessage = new MqttApplicationMessageBuilder()
-                    .WithTopic("base/state/letter")
+                    .WithTopic("base/state/ascii")
+                    .WithPayload(message)
+                    .Build();
+
+                await _mqttClient.PublishAsync(mqttMessage);
+                Console.WriteLine($"Message '{message}' sent to MQTT broker.");
+            }
+            else
+            {
+                Console.WriteLine("MQTT client is not connected.");
+            }
+        }
+
+        public async Task SendColourStateMQTT(string message)
+        {
+            if (_mqttClient.IsConnected)
+            {
+                var mqttMessage = new MqttApplicationMessageBuilder()
+                    .WithTopic("base/state/colour")
+                    .WithPayload(message)
+                    .Build();
+
+                await _mqttClient.PublishAsync(mqttMessage);
+                Console.WriteLine($"Message '{message}' sent to MQTT broker.");
+            }
+            else
+            {
+                Console.WriteLine("MQTT client is not connected.");
+            }
+        }
+
+        public async Task SendBrightnessStateMQTT(string message)
+        {
+            if (_mqttClient.IsConnected)
+            {
+                var mqttMessage = new MqttApplicationMessageBuilder()
+                    .WithTopic("base/state/brightness")
                     .WithPayload(message)
                     .Build();
 

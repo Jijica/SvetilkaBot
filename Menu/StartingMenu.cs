@@ -51,7 +51,7 @@ namespace SvetilkaBot.Menu
         {
             switch (callbackQuery.Data)
             {
-                case "ASCIIMenu":
+                case "AsciiMenu":
                     break;
                 case "notImplemented":
                     await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id, "Функционал отсутствует \U0001F512");
@@ -65,7 +65,7 @@ namespace SvetilkaBot.Menu
                 new[] {
                     new[]
                     {
-                        InlineKeyboardButton.WithCallbackData("Передать ASCII символы", "ASCIIMenu")
+                        InlineKeyboardButton.WithCallbackData("Передать ASCII символы", "AsciiMenu")
                     },
                     new[]
                     {

@@ -8,13 +8,11 @@ namespace SvetilkaBot
     {
         static async Task Main()
         {
-            var envVar = Environment.GetEnvironmentVariable("SvetilkaBotToken", EnvironmentVariableTarget.User);
-            var botClient = new TelegramBotClient(envVar);
+            var botClient = new TelegramBotClient(Config.TelegramToken);
             using CancellationTokenSource cancellationToken = new();
 
-            envVar = Environment.GetEnvironmentVariable("MQTT_ID", EnvironmentVariableTarget.User);
             var mqttClientOptions = new MqttClientOptionsBuilder()
-                .WithClientId(envVar)
+                .WithClientId(Config.MqttId)
                 .WithTcpServer("dev.rightech.io", 1883)
                 .Build();
             var mqttClient = new MqttService(mqttClientOptions);
