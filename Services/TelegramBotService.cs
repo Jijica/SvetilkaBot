@@ -1,6 +1,4 @@
 ﻿using SvetilkaBot.Menu;
-using System.Threading;
-using System.Windows.Markup;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
@@ -16,7 +14,6 @@ namespace SvetilkaBot.Services
         private Chat _chat;
         private IMenu _menu;
         private MqttService _mqttService;
-        //private int _chatIdMenuToEdit;
 
         public TelegramBotService(TelegramBotClient botClient, MqttService mqttService)
         {

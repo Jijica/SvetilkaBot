@@ -7,6 +7,7 @@ namespace SvetilkaBot.Services
     {
         public static void InitializeChat(long chatID)
         {
+            /* Works for pgAdmin, but not for ElephantSql
             var query = @"
                 MERGE INTO botuser AS target
                 USING (VALUES (@chatid)) AS source (chatid)
@@ -20,13 +21,49 @@ namespace SvetilkaBot.Services
                 WHEN NOT MATCHED THEN
                     INSERT (chatid, menustate, ledstate, rgbstate, brightnessstate)
                     VALUES (@chatid, @menustate, @ledstate, @rgbstate, @brightnessstate);
-    ";
+                ";
 
             using (var conn = new NpgsqlConnection(Config.SqlConnectionString))
             {
                 conn.Execute(query, new { chatid = chatID, menustate = "NoState", ledstate = "OFF", rgbstate = "White", brightnessstate = "25%" });
             }
+            */
+
+            var checkIfExistsQuery = @"
+                SELECT COUNT(*) 
+                FROM botuser 
+                WHERE chatid = @chatid;
+                ";
+
+            var insertQuery = @"
+                INSERT INTO botuser (chatid, menustate, ledstate, rgbstate, brightnessstate)
+                VALUES (@chatid, @menustate, @ledstate, @rgbstate, @brightnessstate);
+                ";
+
+            var updateQuery = @"
+                UPDATE botuser 
+                SET menustate = @menustate, 
+                    ledstate = @ledstate, 
+                    rgbstate = @rgbstate, 
+                    brightnessstate = @brightnessstate 
+                WHERE chatid = @chatid;
+                ";
+
+            using (var conn = new NpgsqlConnection(Config.SqlConnectionString))
+            {
+                int count = conn.ExecuteScalar<int>(checkIfExistsQuery, new { chatid = chatID });
+
+                if (count != 0)
+                {
+                    conn.Execute(updateQuery, new { chatid = chatID, menustate = "NoState", ledstate = "OFF", rgbstate = "White", brightnessstate = "25%" });
+                }
+                else
+                {
+                    conn.Execute(insertQuery, new { chatid = chatID, menustate = "NoState", ledstate = "OFF", rgbstate = "White", brightnessstate = "25%" });
+                }
+            }
         }
+
         public static void SetMenuState(long chatID, string state)
         {
             var query = @"update botuser set menustate = @menustate where chatid = @chatid";

@@ -14,7 +14,6 @@ namespace SvetilkaBot.Menu
         private MqttService _mqttService;
         private string _brightnessState;
 
-
         public BrightnessMenu(ITelegramBotClient botClient, Chat chat, MqttService mqttService, CancellationToken cancellationToken)
         {
             _botClient = botClient;

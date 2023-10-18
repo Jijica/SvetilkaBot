@@ -14,7 +14,7 @@ namespace SvetilkaBot
 
         static Config()
         {
-            var envVar = Environment.GetEnvironmentVariable("SqlConnectionStringLocal", EnvironmentVariableTarget.User);
+            var envVar = Environment.GetEnvironmentVariable("SqlConnectionStringElephant", EnvironmentVariableTarget.User);
             SqlConnectionString = envVar;
             envVar = Environment.GetEnvironmentVariable("MQTT_ID", EnvironmentVariableTarget.User);
             MqttId = envVar;
